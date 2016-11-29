@@ -1,16 +1,17 @@
-package module4;
+package module6;
 
 import de.fhpotsdam.unfolding.data.PointFeature;
-import de.fhpotsdam.unfolding.marker.SimplePointMarker;
+import demos.Airport;
+import processing.core.PConstants;
 import processing.core.PGraphics;
 
 /** Implements a visual marker for earthquakes on an earthquake map
  * 
  * @author UC San Diego Intermediate Software Development MOOC team
- * @author Jiani Li
  *
  */
-public abstract class EarthquakeMarker extends SimplePointMarker
+// TODO: Implement the comparable interface
+public abstract class EarthquakeMarker extends CommonMarker implements Comparable<EarthquakeMarker>
 {
 	
 	// Did the earthquake occur on land?  This will be set by the subclasses.
@@ -22,6 +23,9 @@ public abstract class EarthquakeMarker extends SimplePointMarker
 	// based on magnitude. 
 	protected float radius;
 	
+	
+	// constants for distance
+	protected static final float kmPerMile = 1.6f;
 	
 	/** Greater than or equal to this threshold is a moderate earthquake */
 	public static final float THRESHOLD_MODERATE = 5;
@@ -52,9 +56,23 @@ public abstract class EarthquakeMarker extends SimplePointMarker
 		this.radius = 1.75f*getMagnitude();
 	}
 	
-
+	// TODO: Add the method:
+	public int compareTo(EarthquakeMarker marker) {
+		if (this.getMagnitude() < marker.getMagnitude()) {
+			return 1;
+		}
+		else if (this.getMagnitude() == marker.getMagnitude()) {
+			return 0;
+		}
+		else {
+			return -1;
+		}
+	}
+	
+	
 	// calls abstract method drawEarthquake and then checks age and draws X if needed
-	public void draw(PGraphics pg, float x, float y) {
+	@Override
+	public void drawMarker(PGraphics pg, float x, float y) {
 		// save previous styling
 		pg.pushStyle();
 			
@@ -64,23 +82,72 @@ public abstract class EarthquakeMarker extends SimplePointMarker
 		// call abstract method implemented in child class to draw marker shape
 		drawEarthquake(pg, x, y);
 		
-		// OPTIONAL TODO: draw X over marker if within past day		
+		// IMPLEMENT: add X over marker if within past day		
+		String age = getStringProperty("age");
+		if ("Past Hour".equals(age) || "Past Day".equals(age)) {
+			
+			pg.strokeWeight(2);
+			int buffer = 2;
+			pg.line(x-(radius+buffer), 
+					y-(radius+buffer), 
+					x+radius+buffer, 
+					y+radius+buffer);
+			pg.line(x-(radius+buffer), 
+					y+(radius+buffer), 
+					x+radius+buffer, 
+					y-(radius+buffer));
+			
+		}
 		
 		// reset to previous styling
 		pg.popStyle();
 		
 	}
+
+	/** Show the title of the earthquake if this marker is selected */
+	public void showTitle(PGraphics pg, float x, float y)
+	{
+		String title = getTitle();
+		pg.pushStyle();
+		
+		pg.rectMode(PConstants.CORNER);
+		
+		pg.stroke(110);
+		pg.fill(255,255,255);
+		pg.rect(x, y + 15, pg.textWidth(title) +6, 18, 5);
+		
+		pg.textAlign(PConstants.LEFT, PConstants.TOP);
+		pg.fill(0);
+		pg.text(title, x + 3 , y +18);
+		
+		
+		pg.popStyle();
+		
+	}
+
+	
+	/**
+	 * Return the "threat circle" radius, or distance up to 
+	 * which this earthquake can affect things, for this earthquake.   
+	 * DISCLAIMER: this formula is for illustration purposes
+	 *  only and is not intended to be used for safety-critical 
+	 *  or predictive applications.
+	 */
+	public double threatCircle() {	
+		double miles = 20.0f * Math.pow(1.8, 2*getMagnitude()-5);
+		double km = (miles * kmPerMile);
+		return km;
+	}
 	
 	// determine color of marker from depth
-	// We suggest: Deep = red, intermediate = blue, shallow = yellow
-	// But this is up to you, of course.
-	// You might find the getters below helpful.
+	// We use: Deep = red, intermediate = blue, shallow = yellow
 	private void colorDetermine(PGraphics pg) {
-		//TODO: Implement this method
-		if (getDepth() < 70) {
+		float depth = getDepth();
+		
+		if (depth < THRESHOLD_INTERMEDIATE) {
 			pg.fill(255, 255, 0);
 		}
-		else if (getDepth() > 70 && getDepth() < 300) {
+		else if (depth < THRESHOLD_DEEP) {
 			pg.fill(0, 0, 255);
 		}
 		else {
@@ -89,6 +156,14 @@ public abstract class EarthquakeMarker extends SimplePointMarker
 	}
 	
 	
+	/** toString
+	 * Returns an earthquake marker's string representation
+	 * @return the string representation of an earthquake marker.
+	 */
+	public String toString()
+	{
+		return getTitle();
+	}
 	/*
 	 * getters for earthquake properties
 	 */
@@ -114,6 +189,8 @@ public abstract class EarthquakeMarker extends SimplePointMarker
 	{
 		return isOnLand;
 	}
+	
+
 	
 	
 }

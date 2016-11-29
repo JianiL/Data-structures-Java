@@ -1,4 +1,4 @@
-package module4;
+package module6;
 
 import de.fhpotsdam.unfolding.data.PointFeature;
 import processing.core.PGraphics;
@@ -6,7 +6,6 @@ import processing.core.PGraphics;
 /** Implements a visual marker for land earthquakes on an earthquake map
  * 
  * @author UC San Diego Intermediate Software Development MOOC team
- * @author Your name here
  *
  */
 public class LandQuakeMarker extends EarthquakeMarker {
@@ -24,16 +23,13 @@ public class LandQuakeMarker extends EarthquakeMarker {
 
 	@Override
 	public void drawEarthquake(PGraphics pg, float x, float y) {
-		// Draw a centered circle for land quakes
-		// DO NOT set the fill color here.  That will be set in the EarthquakeMarker
+		// IMPLEMENT: drawing circle for LandQuake
+		// DO NOT set the fill color.  That will be set in the EarthquakeMarker
 		// class to indicate the depth of the earthquake.
-		// Simply draw a centered circle.
-		
+		// Simply draw a centered square.
 		// HINT: Notice the radius variable in the EarthquakeMarker class
 		// and how it is set in the EarthquakeMarker constructor
-		
-		// TODO: Implement this method
-		pg.ellipse(x, y, getRadius(), getRadius());
+		pg.ellipse(x, y, 2*radius, 2*radius);
 		
 	}
 	
@@ -42,8 +38,6 @@ public class LandQuakeMarker extends EarthquakeMarker {
 	public String getCountry() {
 		return (String) getProperty("country");
 	}
-
-
 
 		
 }
